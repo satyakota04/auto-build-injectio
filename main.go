@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/harness/auto-build-injection/autodetect"
+	"github.com/satyakota04/auto-build-injectio/autodetect"
 )
 
 func main() {
