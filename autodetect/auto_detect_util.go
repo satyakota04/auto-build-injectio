@@ -16,7 +16,7 @@ type buildToolInfo struct {
 }
 
 func DetectDirectoriesToCache(path string) error {
-		var buildToolInfoMapping = []buildToolInfo{
+	var buildToolInfoMapping = []buildToolInfo{
 		{
 			globToDetect: "build.gradle",
 			tool:         "gradle",
@@ -40,17 +40,22 @@ func DetectDirectoriesToCache(path string) error {
 	}
 
 	for _, supportedTool := range buildToolInfoMapping {
+		// First try direct match
 		hash, dir, err := hashIfFileExist(path, supportedTool.globToDetect)
 		if err != nil {
 			return err
 		}
-		if hash == "" {
+
+		// If no direct match found, try recursive search
+		if hash == "" || dir == "" {
 			hash, dir, err = hashIfFileExist(path, filepath.Join("**", supportedTool.globToDetect))
+			if err != nil {
+				return err
+			}
 		}
-		if err != nil {
-			return err
-		}
+
 		if dir != "" && hash != "" {
+			fmt.Printf("Detected %s build tool at %s\n", supportedTool.tool, dir)
 			err = supportedTool.injecter.InjectTool()
 			if err != nil {
 				fmt.Printf("Error while auto-injecting for %s build tool: %s\n", supportedTool.tool, err.Error())
